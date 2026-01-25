@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware
 const corsOptions = {
-  origin: 'https://sat-secret.vercel.app',
+  origin: 'https://sat-secrets.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email'],
   exposedHeaders: ['Content-Type'], 

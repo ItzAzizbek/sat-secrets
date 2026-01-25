@@ -3,7 +3,7 @@ import { getAuthEmail } from './authStore';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API,
+  baseURL: import.meta.env.VITE_API+"/api",
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

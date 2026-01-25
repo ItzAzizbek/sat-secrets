@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware
 const corsOptions = {
-  origin: 'http://localhost:5173', // your frontend
+  origin: 'https://sat-secrets.vercel.app/', // your frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email'],
   exposedHeaders: ['Content-Type'], // make sure JSON body is readable

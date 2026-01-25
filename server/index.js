@@ -12,7 +12,7 @@ const corsOptions = {
   origin: 'https://sat-secrets.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email'],
-  exposedHeaders: ['Content-Type'],
+  exposedHeaders: ['Content-Type'], 
 };
 
 app.use(cors(corsOptions));
@@ -30,9 +30,9 @@ let checkBlacklist;
 try {
   checkBlacklist = require('./middleware/checkBlacklist');
   app.use(checkBlacklist);
-  console.log('✅ Blacklist middleware loaded');
 } catch (error) {
-  console.warn('⚠️  Blacklist middleware not loaded:', error.message);
+  console.warn('Blacklist middleware not loaded:', error.message);
+  // Continue without blacklist if it fails
 }
 
 // Routes (Placeholder)
@@ -40,25 +40,20 @@ app.get("/", (req, res) => {
   res.send("Secrets Of SAT API is running");
 });
 
-// Import and mount routes
-const routes = [
-  { path: "/api/contact", file: "./routes/contact" },
-  { path: "/api/orders", file: "./routes/orders" },
-  { path: "/api/admin", file: "./routes/admin" },
-  { path: "/api/products", file: "./routes/products" }
-];
+// Import Routes
+try {
+  const contactRoutes = require("./routes/contact");
+  const ordersRoutes = require("./routes/orders");
+  const adminRoutes = require("./routes/admin");
+  const productsRoutes = require("./routes/products");
 
-routes.forEach(({ path, file }) => {
-  try {
-    const route = require(file);
-    app.use(path, route);
-    console.log(`✅ Loaded route: ${path}`);
-  } catch (error) {
-    console.error(`❌ Failed to load route ${path}:`, error.message);
-    console.error(`   Make sure ${file}.js exists and exports a router`);
-    process.exit(1);
-  }
-});
+  app.use("/api/contact", contactRoutes);
+  app.use("/api/orders", ordersRoutes);
+  app.use("/api/admin", adminRoutes);
+  app.use("/api/products", productsRoutes);
+} catch (error) {
+  console.error('Error loading routes:', error);
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {

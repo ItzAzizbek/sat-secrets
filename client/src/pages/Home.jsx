@@ -10,7 +10,7 @@ const TESTIMONIALS = [
     id: 1,
     name: "Azizbek O.",
     location: "Tashkent, UZ",
-    text: "I was skeptical at first, but the accuracy for the March SAT was 100%. This is the only legit source I've found.",
+    text: "I was skeptical at first, but the accuracy for the November SAT was 100%. This is the only legit source I've found.",
     verified: true
   },
   {

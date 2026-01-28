@@ -3,6 +3,7 @@ const router = express.Router();
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 const multer = require('multer');
+const crypto = require('crypto');
 
 // Configure multer with 5MB file size limit
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -129,6 +130,9 @@ router.post('/', upload.single('screenshot'), async (req, res) => {
     console.log('[Orders] Step 4: Saving to Firestore...');
     
     // 4. Save to Firestore
+    // Hash the IP to preserve anonymity (Strategic Directive: Privacy is Absolute)
+    const ipHash = crypto.createHash('sha256').update(req.ip || 'unknown').digest('hex');
+
     const orderData = {
       image_url: imageUrl,
       contact_info: req.body.contactInfo || 'Not Provided',
@@ -137,7 +141,7 @@ router.post('/', upload.single('screenshot'), async (req, res) => {
       ai_decision: aiResult,
       status: 'PENDING_ADMIN',
       timestamp: new Date().toISOString(),
-      user_ip: req.ip
+      user_ip_hash: ipHash // Storing hash instead of raw IP
     };
 
     let docRef;

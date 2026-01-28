@@ -93,15 +93,22 @@ exports.analyzeScreenshot = async (imageBuffer, mimeType, expectedAmount = null)
       },
     };
 
-    const result = await model.generateContent([prompt, imagePart]);
+    // 10-second timeout to minimize friction (Fail Open)
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('AI Analysis Timed Out')), 10000)
+    );
+
+    const apiCallPromise = model.generateContent([prompt, imagePart]);
+
+    const result = await Promise.race([apiCallPromise, timeoutPromise]);
     const response = await result.response;
     const text = response.text();
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanText);
   } catch (error) {
-    console.error("AI Vision Error Full Details:", error);
+    console.error("AI Vision Error Full Details:", error.message);
     
-    // Always return fallback for ANY error to keep the flow going
+    // Always return fallback for ANY error to keep the flow going (Fail Open)
     return {
       isReal: true,
       confidence: 0.5,

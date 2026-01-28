@@ -5,6 +5,12 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../config/axios';
 import { Loader2, Package, Calendar, ShoppingCart } from 'lucide-react';
 
+import proof1 from '../assets/proofs/proof1.jpeg';
+import proof2 from '../assets/proofs/proof2.jpeg';
+import proof3 from '../assets/proofs/proof3.jpg';
+import proof4 from '../assets/proofs/proof4.jpeg';
+import proof5 from '../assets/proofs/proof5.jpeg';
+
 const Home = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -153,6 +159,27 @@ const Home = () => {
             })}
           </div>
         )}
+
+        {/* Proofs Section */}
+        <div className="mt-20">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-8 border-b-2 border-black pb-4">
+            Previous Products/Proofs
+          </h2>
+          <div className="flex overflow-x-auto pb-6 gap-6">
+            {[proof1, proof2, proof3, proof4, proof5].map((src, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 border-2 border-gray-200 p-2 hover:border-black transition-all bg-white"
+              >
+                <img
+                  src={src}
+                  alt={`Proof ${index + 1}`}
+                  className="h-96 w-auto object-contain"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </Layout>
   );

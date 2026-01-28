@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import api from '../config/axios';
 import { useAuth } from '../contexts/AuthContext';
-import { ADMIN_EMAIL } from '../constants';
+import { ADMIN_EMAILS } from '../constants';
 import { Check, X, Eye, Loader2, Plus, Package, Calendar, Trash2, DollarSign } from 'lucide-react';
 
 const Admin = () => {
@@ -31,14 +31,14 @@ const Admin = () => {
       navigate('/login', { replace: true });
       return;
     }
-    if (user.email !== ADMIN_EMAIL) {
+    if (!ADMIN_EMAILS.includes(user.email.toLowerCase().trim())) {
       navigate('/', { replace: true });
       return;
     }
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (authLoading || !user || user.email !== ADMIN_EMAIL) return;
+    if (authLoading || !user || !ADMIN_EMAILS.includes(user.email.toLowerCase().trim())) return;
     // Wrap in try-catch to prevent unhandled promise rejections
     const loadData = async () => {
       try {
@@ -210,7 +210,7 @@ const Admin = () => {
       </Layout>
     );
   }
-  if (!user || user.email !== ADMIN_EMAIL) {
+  if (!user || !ADMIN_EMAILS.includes(user.email.toLowerCase().trim())) {
     return null;
   }
 

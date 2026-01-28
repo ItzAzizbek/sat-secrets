@@ -46,11 +46,13 @@ try {
   const ordersRoutes = require("./routes/orders");
   const adminRoutes = require("./routes/admin");
   const productsRoutes = require("./routes/products");
+  const chatRoutes = require("./routes/chat");
 
   app.use("/api/contact", contactRoutes);
   app.use("/api/orders", ordersRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/products", productsRoutes);
+  app.use("/api/chat", chatRoutes);
 } catch (error) {
   console.error('Error loading routes:', error);
 }

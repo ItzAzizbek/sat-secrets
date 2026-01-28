@@ -6,12 +6,18 @@ const { db } = require('../services/firebaseService');
 // Middleware to check admin auth (Basic implementation based on email in body or header? 
 // For now, let's assume client sends an 'admin-secret' header or similar simple protection as requested by .env approach)
 const isAdmin = (req, res, next) => {
-  const adminSecret = req.headers['x-admin-secret'];
-  if (adminSecret === process.env.ADMIN_SECRET) {
+  const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(email => email.trim().toLowerCase());
+  const userEmail = (req.headers['x-user-email'] || '').trim().toLowerCase();
+  
+  if (userEmail && adminEmails.includes(userEmail)) {
     next();
   } else {
-    // Or check firebase auth token claims
-    next(); // For dev simplicity, skipping strict check. TODO: Enforce.
+    // Check for admin-secret as a fallback or for development
+    const adminSecret = req.headers['x-admin-secret'];
+    if (adminSecret && adminSecret === process.env.ADMIN_SECRET) {
+      return next();
+    }
+    res.status(403).json({ error: 'Admin access denied' });
   }
 };
 

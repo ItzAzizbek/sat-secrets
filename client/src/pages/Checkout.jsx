@@ -19,6 +19,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle"); // idle, processing, success, banned
   const [errorMsg, setErrorMsg] = useState("");
+  const [warningExpanded, setWarningExpanded] = useState(false);
 
   if (!state) {
     return (
@@ -259,12 +260,41 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <div className="bg-red-50 border-l-2 border-red-500 p-4 text-[10px] uppercase tracking-wide text-red-600 flex gap-3">
-                <AlertTriangle size={14} className="shrink-0" />
-                <p>
-                  AI Audit Active. Fake or amount-mismatched proofs result in
-                  immediate email ban.
-                </p>
+              <div className="bg-red-50 border-l-2 border-red-500 p-4 text-[10px] uppercase tracking-wide text-red-600">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex gap-3">
+                    <AlertTriangle size={14} className="shrink-0" />
+                    <div>
+                      <p className="font-bold">FORMAL WARNING AND ZERO TOLERANCE NOTICE</p>
+                      <p className="mt-1">We actively deploy AI driven verification tools to detect fraudulent payment proofs.</p>
+                    </div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setWarningExpanded(!warningExpanded)}
+                    className="underline font-bold hover:text-red-800 transition-colors shrink-0"
+                  >
+                    {warningExpanded ? "COLLAPSE" : "EXPAND"}
+                  </button>
+                </div>
+                
+                {warningExpanded && (
+                  <div className="mt-4 space-y-4 border-t border-red-200 pt-4 animate-fade-in normal-case tracking-normal text-[11px] leading-relaxed">
+                    <p>We actively deploy automated systems and AI driven verification tools to detect fake screenshots, forged transaction records, and fraudulent payment proofs.</p>
+                    <p>Any attempt to upload, submit, or circulate fake or fraudulent proof of payment will trigger immediate enforcement actions.</p>
+                    <p className="font-bold">Consequences are absolute and irreversible:</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>Permanent blacklisting from all current and future products and services</li>
+                      <li>Permanent IP address ban across all platforms and access points</li>
+                      <li>Permanent termination of access to customer support and communication channels</li>
+                      <li>Internal flagging of the account for fraud prevention systems</li>
+                    </ul>
+                    <p>There are no appeals, no reviews, and no exceptions.</p>
+                    <p>All activity is logged, analyzed, and retained for security and compliance purposes.</p>
+                    <p>Proceed only with legitimate transactions. Any deviation will be treated as intentional fraud.</p>
+                    <p className="font-bold border-t border-red-200 pt-2 mt-2 uppercase tracking-widest text-[10px]">Compliance is mandatory.</p>
+                  </div>
+                )}
               </div>
 
               {errorMsg && (

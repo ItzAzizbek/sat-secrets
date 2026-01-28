@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ADMIN_EMAIL } from '../constants';
+import { ADMIN_EMAILS } from '../constants';
+import Chatbox from './Chatbox';
 
 const Layout = ({ children }) => {
   const { user, signOut } = useAuth();
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
 
   return (
     <div className="min-h-screen bg-white text-black flex flex-col font-sans selection:bg-black selection:text-white">
@@ -51,6 +52,7 @@ const Layout = ({ children }) => {
         <span className="hidden md:inline mx-2">|</span> 
         Premium Exam Leaks
       </footer>
+      <Chatbox />
     </div>
   );
 };

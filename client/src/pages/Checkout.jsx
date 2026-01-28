@@ -179,29 +179,39 @@ const Checkout = () => {
               </div>
             </div>
 
-            <div className="mt-16 bg-white p-8 shadow-lg relative overflow-hidden border-2 border-gray-200">
-              <div className="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl italic">
-                VISA
+            <div className="mt-16 space-y-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                Send Payment to Crypto Address
+              </p>
+              
+              <div className="space-y-3">
+                {[
+                  { label: 'BTC (Bitcoin)', address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh' },
+                  { label: 'ETH (Ethereum)', address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' },
+                  { label: 'USDT (ERC20)', address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' }
+                ].map((item) => (
+                  <div key={item.label} className="bg-white p-4 border-2 border-gray-100 hover:border-black transition-all group">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-black uppercase text-gray-400 group-hover:text-black transition-colors">{item.label}</span>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(item.address);
+                          alert(`${item.label} address copied!`);
+                        }}
+                        className="text-[8px] font-black uppercase tracking-widest border border-gray-200 px-2 py-0.5 hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] group-hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <p className="font-mono text-[11px] break-all leading-relaxed bg-gray-50 p-2 border border-gray-100 group-hover:bg-white group-hover:border-black/10 transition-all font-bold">
+                      {item.address}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-8">
-                Secure Payment Gateway
-              </p>
-              <p className="font-mono text-2xl tracking-widest mb-8">
-                4242 4242 4242 9999
-              </p>
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-[8px] uppercase font-bold text-gray-400">
-                    Merchant
-                  </p>
-                  <p className="font-bold uppercase text-xs">SECRETS OF SAT</p>
-                </div>
-                <div>
-                  <p className="text-[8px] uppercase font-bold text-gray-400">
-                    Code
-                  </p>
-                  <p className="font-bold uppercase text-xs">***</p>
-                </div>
+              
+              <div className="bg-blue-50 border-l-2 border-blue-500 p-4 text-[10px] uppercase tracking-wide text-blue-600 font-bold leading-relaxed">
+                <p>Ensure you send the EXACT amount specified above. AI verification will fail if the amount is mismatched.</p>
               </div>
             </div>
           </div>

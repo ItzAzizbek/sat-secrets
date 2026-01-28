@@ -181,13 +181,28 @@ const Checkout = () => {
 
             <div className="mt-16 space-y-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                Payment Gateway
+                Security Protocol
               </p>
               
-              <div className="bg-white p-8 border-2 border-dashed border-gray-200 text-center">
-                <p className="text-gray-400 uppercase text-xs font-bold tracking-widest">
-                  To be implemented
+              <div className="bg-black text-white p-8 border border-gray-800">
+                <h3 className="text-xl font-black uppercase tracking-tighter mb-4">Privacy is Absolute</h3>
+                <p className="text-gray-400 text-xs leading-relaxed uppercase tracking-wide mb-4">
+                  We operate in the shadows so you can too. Anonymity is our currency.
                 </p>
+                <ul className="space-y-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1 h-1 bg-green-500 rounded-full"></span>
+                    IP Addresses Hashed & Discarded
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1 h-1 bg-green-500 rounded-full"></span>
+                    Metadata Stripped on Upload
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1 h-1 bg-green-500 rounded-full"></span>
+                    Zero Third-Party Tracking
+                  </li>
+                </ul>
               </div>
               
               <div className="bg-blue-50 border-l-2 border-blue-500 p-4 text-[10px] uppercase tracking-wide text-blue-600 font-bold leading-relaxed">

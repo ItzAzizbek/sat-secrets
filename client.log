@@ -1,0 +1,10 @@
+
+> client@0.0.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 269 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+3:40:57 AM [vite] hmr update /src/contexts/AuthContext.jsx, /src/index.css

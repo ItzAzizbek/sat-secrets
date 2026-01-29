@@ -226,7 +226,6 @@ const Checkout = () => {
               </div>
             </div>
 
-<<<<<<< HEAD
             <div className="space-y-6 mt-12">
               <div className="p-6 bg-white border-l-4 border-black shadow-sm">
                 <h3 className="font-bold uppercase text-xs tracking-widest mb-2 flex items-center gap-2">
@@ -241,37 +240,6 @@ const Checkout = () => {
                 Encrypted & Secure Session
               </div>
             </div>
-=======
-              <div className="bg-gray-100 border border-gray-300 p-6 space-y-6">
-                <h3 className="text-lg font-black uppercase tracking-tighter border-b border-gray-300 pb-2">Select Payment Method</h3>
-
-                <div className="space-y-4">
-                  {/* Bitcoin */}
-                  <div className="bg-white p-4 border border-gray-200">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Bitcoin (BTC)</p>
-                    <p className="text-[11px] font-mono break-all select-all bg-gray-50 p-2 border border-dashed border-gray-200">bc1qjq5zaqt6qqu7mfyrmdtk9ehpeu9eqsfgrxqzhn</p>
-                  </div>
-
-                  {/* Ton Network */}
-                  <div className="bg-white p-4 border border-gray-200">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Ton Network (Toncoin / USDT)</p>
-                    <p className="text-[11px] font-mono break-all select-all bg-gray-50 p-2 border border-dashed border-gray-200">UQBv36DBWQXHv_DXR20kWNqRmIpcSyb2WmLYQYVKq2wN5YK4</p>
-                    <p className="text-[9px] text-gray-400 mt-1 uppercase font-bold">Network: TON</p>
-                  </div>
-
-                  {/* Bep20 */}
-                  <div className="bg-white p-4 border border-gray-200">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Bep20 / BNB Chain (BNB / USDT)</p>
-                    <p className="text-[11px] font-mono break-all select-all bg-gray-50 p-2 border border-dashed border-gray-200">0xb788375031d3259d0f49548076c17998c522bd61</p>
-                    <p className="text-[9px] text-gray-400 mt-1 uppercase font-bold">Network: BSC (BNB Smart Chain)</p>
-                  </div>
-                </div>
-
-                <div className="bg-black text-white p-4 text-[9px] uppercase tracking-widest leading-relaxed font-bold border-l-4 border-yellow-500">
-                  <p>⚠️ AI will verify the platform (Binance, Trust, etc.), the exact amount, and the destination address. Ensure you use the correct network.</p>
-                </div>
-              </div>
->>>>>>> origin/main
           </div>
         </div>
 

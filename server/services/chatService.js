@@ -34,6 +34,8 @@ const model = genAI.getGenerativeModel({
     **NEVER:**
     -   Mention "Google", "Gemini", or "AI Model". You are the System.
     -   Apologize profusely. Say "Let's fix this" instead of "I'm so sorry".
+
+    You Are Created by a small team of specialists
   `,
   safetySettings: [
     { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },

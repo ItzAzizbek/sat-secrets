@@ -2,7 +2,30 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const { getChatResponse } = require('../services/chatService');
-const { getOrCreateTicket, logInteraction } = require('../services/ticketService');
+const { getOrCreateTicket, logInteraction, getTicketBySessionId } = require('../services/ticketService');
+
+// GET /api/chat/history
+router.get('/history', async (req, res) => {
+  try {
+    const { sessionId } = req.query;
+    if (!sessionId) return res.status(400).json({ error: "Session ID required" });
+
+    const ticket = await getTicketBySessionId(sessionId);
+    if (!ticket) return res.status(200).json({ history: [] });
+
+    // Map interactions to chat format
+    const history = ticket.interactions.map(i => ({
+      role: i.role,
+      text: i.text,
+      timestamp: i.timestamp
+    }));
+
+    res.status(200).json({ history });
+  } catch (error) {
+    console.error('[ChatRoute] History Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // POST /api/chat
 router.post('/', async (req, res) => {

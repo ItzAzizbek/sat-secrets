@@ -16,7 +16,7 @@ const LandingPage = () => {
             </h1>
             <p className="text-lg md:text-2xl font-medium tracking-wide max-w-2xl mb-12">
               Access verified examination materials. <br className="hidden md:block"/>
-              No noise. No tracking. Just the signal.
+              No noise. No tracking. Just the material.
             </p>
             <Link
               to="/login"
@@ -41,19 +41,19 @@ const LandingPage = () => {
               <div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-4">Clarity</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  We remove the uncertainty of the unknown. Standardized testing is a market inefficiency we correct with information leverage.
+                  We simplify the process. You get exactly what you need to prepare, without unnecessary complexity.
                 </p>
               </div>
               <div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-4">Discretion</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  Your identity is an asset we refuse to compromise. We operate on a need-to-know basis, and we do not need to know you.
+                  We respect your privacy. We do not ask for your name or personal data. It is not required.
                 </p>
               </div>
               <div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-4">Certainty</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                   We verify so you don't have to guess. Every document is subjected to rigorous authentication before listing.
+                   We verify everything. Every document is checked for authenticity before it reaches you.
                 </p>
               </div>
             </div>
@@ -72,21 +72,21 @@ const LandingPage = () => {
                   <EyeOff className="mt-1" size={24} />
                   <div>
                     <h4 className="font-bold uppercase tracking-wider mb-2">Zero Tracking</h4>
-                    <p className="text-gray-400 text-sm">We do not track you. We do not want your data. We operate without analytics or pixels.</p>
+                    <p className="text-gray-400 text-sm">We do not track you. We do not want your data. The platform works without knowing who you are.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <Lock className="mt-1" size={24} />
                   <div>
                     <h4 className="font-bold uppercase tracking-wider mb-2">Crypto Only</h4>
-                    <p className="text-gray-400 text-sm">We accept only cryptocurrency to ensure the transaction vanishes the moment it is complete. Not a limitation, but a design choice.</p>
+                    <p className="text-gray-400 text-sm">We accept only cryptocurrency. This ensures the transaction is secure and leaves no personal record.</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="border border-white/20 p-8 md:p-12">
               <p className="text-lg md:text-xl font-medium leading-relaxed">
-                "Privacy is not a feature we add. It is the foundation we build upon. In an age of surveillance, we offer a sanctuary of silence."
+                "Privacy is our foundation. We designed this platform to protect you by default. We do not collect what we do not need."
               </p>
             </div>
           </div>
@@ -97,7 +97,7 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
             <h2 className="text-4xl font-black uppercase tracking-tighter">The Standard</h2>
             <p className="text-sm max-w-md text-right md:text-left">
-              Credibility is not claimed; it is demonstrated through consistency and verification.
+              Credibility comes from consistency. We verify so you can be sure.
             </p>
           </div>
 
@@ -108,7 +108,7 @@ const LandingPage = () => {
                  <h3 className="font-bold uppercase tracking-wider">AI Analysis</h3>
                </div>
                <p className="text-xs text-gray-500 uppercase tracking-wide">
-                 Advanced pattern recognition to verify authenticity against historical data.
+                 We use technology to verify authenticity against past exams.
                </p>
              </div>
              <div className="border-t-2 border-black pt-6">
@@ -117,7 +117,7 @@ const LandingPage = () => {
                  <h3 className="font-bold uppercase tracking-wider">Human Review</h3>
                </div>
                <p className="text-xs text-gray-500 uppercase tracking-wide">
-                 Expert manual inspection to ensure completeness and accuracy of materials.
+                 Experts check every document for completeness and accuracy.
                </p>
              </div>
              <div className="border-t-2 border-black pt-6">
@@ -126,7 +126,7 @@ const LandingPage = () => {
                  <h3 className="font-bold uppercase tracking-wider">Secure Delivery</h3>
                </div>
                <p className="text-xs text-gray-500 uppercase tracking-wide">
-                 Encrypted channels for delivery. Content integrity guaranteed.
+                 Content is delivered safely and directly to you.
                </p>
              </div>
           </div>

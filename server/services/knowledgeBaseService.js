@@ -111,3 +111,29 @@ exports.seedDefaultArticles = async () => {
     await exports.addArticle(article.title, article.content, article.tags);
   }
 };
+
+/**
+ * Retrieves all KB articles.
+ */
+exports.getAllArticles = async () => {
+  try {
+    const snapshot = await db.collection(COLLECTION_NAME).orderBy('title').get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('[KnowledgeBase] Error getting articles:', error);
+    return [];
+  }
+};
+
+/**
+ * Deletes an article by ID.
+ * @param {string} id
+ */
+exports.deleteArticle = async (id) => {
+  try {
+    await db.collection(COLLECTION_NAME).doc(id).delete();
+  } catch (error) {
+    console.error('[KnowledgeBase] Error deleting article:', error);
+    throw error;
+  }
+};

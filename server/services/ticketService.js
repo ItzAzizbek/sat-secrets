@@ -100,3 +100,39 @@ exports.escalateTicket = async (ticketId, reason) => {
     console.error('[TicketService] Error escalating:', error);
   }
 };
+
+/**
+ * Retrieves all tickets, sorted by last_updated desc.
+ */
+exports.getAllTickets = async () => {
+  try {
+    const snapshot = await db.collection(COLLECTION_NAME).orderBy('last_updated', 'desc').get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('[TicketService] Error getting all tickets:', error);
+    return [];
+  }
+};
+
+/**
+ * Adds an admin reply to a ticket.
+ * @param {string} ticketId
+ * @param {string} text
+ */
+exports.addAdminReply = async (ticketId, text) => {
+  return exports.logInteraction(ticketId, 'model', text); // reusing 'model' role for now, or could use 'admin' if frontend supports it
+};
+
+/**
+ * Gets ticket by sessionId (read-only)
+ */
+exports.getTicketBySessionId = async (sessionId) => {
+  try {
+    const snapshot = await db.collection(COLLECTION_NAME).where('sessionId', '==', sessionId).limit(1).get();
+    if (snapshot.empty) return null;
+    return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+  } catch (error) {
+    console.error('[TicketService] Error getting ticket by session:', error);
+    return null;
+  }
+};

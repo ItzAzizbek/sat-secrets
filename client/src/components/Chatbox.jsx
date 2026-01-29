@@ -7,13 +7,37 @@ const Chatbox = () => {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(localStorage.getItem('chatSessionId'));
   const scrollRef = useRef(null);
 
+  // Scroll to bottom on new message
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [chatHistory]);
+  }, [chatHistory, isOpen]);
+
+  // Load history on mount
+  useEffect(() => {
+    if (sessionId) {
+      const fetchHistory = async () => {
+        try {
+          const res = await api.get(`/chat/history?sessionId=${sessionId}`);
+          if (res.data.history && Array.isArray(res.data.history)) {
+            setChatHistory(res.data.history);
+          }
+        } catch (err) {
+          console.error('Failed to load history', err);
+          // If session is invalid, clear it
+          if (err.response && err.response.status === 404) {
+            localStorage.removeItem('chatSessionId');
+            setSessionId(null);
+          }
+        }
+      };
+      fetchHistory();
+    }
+  }, [sessionId]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -27,8 +51,14 @@ const Chatbox = () => {
     try {
       const res = await api.post('/chat', {
         message: message,
-        history: chatHistory
+        history: chatHistory,
+        sessionId: sessionId
       });
+
+      if (res.data.sessionId) {
+        setSessionId(res.data.sessionId);
+        localStorage.setItem('chatSessionId', res.data.sessionId);
+      }
 
       const aiResponse = { role: 'model', text: res.data.response };
       setChatHistory(prev => [...prev, aiResponse]);

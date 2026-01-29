@@ -9,12 +9,18 @@ import { Check, X, Eye, Loader2, Plus, Package, Calendar, Trash2, DollarSign } f
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'products'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'intelligence'
   const [requests, setRequests] = useState([]);
   const [products, setProducts] = useState([]);
+  const [kbArticles, setKbArticles] = useState([]);
+  const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(false);
+  const [kbLoading, setKbLoading] = useState(false);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [ticketReply, setTicketReply] = useState('');
   
   // Product creation form
   const [showProductForm, setShowProductForm] = useState(false);
@@ -24,6 +30,10 @@ const Admin = () => {
     description: '',
     price: ''
   });
+
+  // KB creation form
+  const [showKbForm, setShowKbForm] = useState(false);
+  const [kbForm, setKbForm] = useState({ title: '', content: '', tags: '' });
 
   useEffect(() => {
     if (authLoading) return;
@@ -42,7 +52,7 @@ const Admin = () => {
     // Wrap in try-catch to prevent unhandled promise rejections
     const loadData = async () => {
       try {
-        await Promise.all([fetchRequests(), fetchProducts()]);
+        await Promise.all([fetchRequests(), fetchProducts(), fetchKB(), fetchTickets()]);
       } catch (error) {
         // Errors are already handled in individual functions
         // This just prevents unhandled promise rejection warnings
@@ -50,6 +60,118 @@ const Admin = () => {
     };
     loadData();
   }, [authLoading, user]);
+
+  const fetchTickets = async () => {
+    setTicketsLoading(true);
+    try {
+      const res = await api.get('/admin/tickets', {
+        timeout: 5000,
+        validateStatus: () => true
+      });
+      if (res.status === 200) {
+        setTickets(res.data.tickets || []);
+      } else {
+        setTickets([]);
+      }
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+      setTickets([]);
+    } finally {
+      setTicketsLoading(false);
+    }
+  };
+
+  const handleTicketReply = async (e) => {
+    e.preventDefault();
+    if (!ticketReply.trim() || !selectedTicket) return;
+
+    try {
+      const res = await api.post(`/admin/tickets/${selectedTicket.id}/reply`, { message: ticketReply });
+      if (res.status === 200) {
+        // Optimistically update
+        const newInteraction = {
+          role: 'model',
+          text: ticketReply,
+          timestamp: new Date().toISOString()
+        };
+        const updatedTicket = {
+          ...selectedTicket,
+          interactions: [...(selectedTicket.interactions || []), newInteraction],
+          last_updated: new Date().toISOString()
+        };
+
+        setSelectedTicket(updatedTicket);
+        setTickets(tickets.map(t => t.id === selectedTicket.id ? updatedTicket : t));
+        setTicketReply('');
+      } else {
+        alert('Failed to send reply');
+      }
+    } catch (err) {
+      console.error('Reply error:', err);
+      alert('Error sending reply');
+    }
+  };
+
+  const fetchKB = async () => {
+    setKbLoading(true);
+    try {
+      const res = await api.get('/admin/kb', {
+        timeout: 5000,
+        validateStatus: () => true
+      });
+      if (res.status === 200) {
+        setKbArticles(res.data.articles || []);
+      } else {
+        setKbArticles([]);
+      }
+    } catch (error) {
+      console.error('Error fetching KB:', error);
+      setKbArticles([]);
+    } finally {
+      setKbLoading(false);
+    }
+  };
+
+  const handleCreateArticle = async (e) => {
+    e.preventDefault();
+    try {
+      const tagsArray = kbForm.tags.split(',').map(t => t.trim()).filter(t => t);
+      const res = await api.post('/admin/kb', { ...kbForm, tags: tagsArray }, {
+        timeout: 5000,
+        validateStatus: () => true
+      });
+
+      if (res.status === 200) {
+        setKbForm({ title: '', content: '', tags: '' });
+        setShowKbForm(false);
+        await fetchKB();
+        alert('Article added successfully');
+      } else {
+        alert('Failed to add article');
+      }
+    } catch (err) {
+      console.error('Error creating article:', err);
+      alert('Error creating article');
+    }
+  };
+
+  const handleDeleteArticle = async (id) => {
+    if (!confirm('Are you sure you want to delete this article?')) return;
+    try {
+      const res = await api.delete(`/admin/kb/${id}`, {
+        timeout: 5000,
+        validateStatus: () => true
+      });
+      if (res.status === 200) {
+        await fetchKB();
+        alert('Article deleted');
+      } else {
+        alert('Failed to delete article');
+      }
+    } catch (err) {
+      console.error('Error deleting article:', err);
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -245,6 +367,16 @@ const Admin = () => {
             }`}
           >
             Products
+          </button>
+          <button
+            onClick={() => setActiveTab('intelligence')}
+            className={`px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all ${
+              activeTab === 'intelligence'
+                ? 'border-b-2 border-black text-black'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            Intelligence
           </button>
         </div>
 
@@ -579,6 +711,270 @@ const Admin = () => {
                     </div>
                   ))
                 )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Intelligence Tab */}
+        {activeTab === 'intelligence' && (
+          <div className="space-y-12">
+            {/* Knowledge Base Section */}
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-black uppercase tracking-tighter">Knowledge Base (RAG)</h3>
+                <button
+                  onClick={() => setShowKbForm(!showKbForm)}
+                  className="bg-black text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all inline-flex items-center gap-2"
+                >
+                  <Plus size={16} /> Add Article
+                </button>
+              </div>
+
+              {showKbForm && (
+                <div className="bg-white border-2 border-black p-8 shadow-xl animate-fade-in">
+                  <h4 className="text-lg font-black uppercase mb-6 tracking-tighter">New Knowledge Protocol</h4>
+                  <form onSubmit={handleCreateArticle} className="space-y-6">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-gray-500">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        value={kbForm.title}
+                        onChange={(e) => setKbForm({ ...kbForm, title: e.target.value })}
+                        className="w-full border-2 border-gray-200 focus:border-black py-3 px-4 text-sm font-medium focus:outline-none transition-all"
+                        placeholder="e.g., Refund Protocol 1.0"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-gray-500">
+                        Content (Context for AI)
+                      </label>
+                      <textarea
+                        value={kbForm.content}
+                        onChange={(e) => setKbForm({ ...kbForm, content: e.target.value })}
+                        className="w-full border-2 border-gray-200 focus:border-black py-3 px-4 text-sm focus:outline-none transition-all resize-none font-mono"
+                        rows="5"
+                        placeholder="Define the truth here..."
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-gray-500">
+                        Tags (Comma separated)
+                      </label>
+                      <input
+                        type="text"
+                        value={kbForm.tags}
+                        onChange={(e) => setKbForm({ ...kbForm, tags: e.target.value })}
+                        className="w-full border-2 border-gray-200 focus:border-black py-3 px-4 text-sm font-medium focus:outline-none transition-all"
+                        placeholder="refund, money, policy"
+                      />
+                    </div>
+
+                    <div className="flex gap-4">
+                      <button
+                        type="submit"
+                        className="bg-black text-white px-8 py-3 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all"
+                      >
+                        Commit Protocol
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowKbForm(false);
+                          setKbForm({ title: '', content: '', tags: '' });
+                        }}
+                        className="bg-white border-2 border-black text-black px-8 py-3 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {kbLoading ? (
+                <div className="flex justify-center h-64 items-center">
+                  <Loader2 className="animate-spin text-black" size={48} />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {kbArticles.length === 0 ? (
+                    <div className="text-center py-12 text-gray-400 uppercase tracking-widest text-xs">
+                      Knowledge Base Empty. AI is operating on base instincts.
+                    </div>
+                  ) : (
+                    kbArticles.map(article => (
+                      <div key={article.id} className="bg-white border border-gray-200 p-6 hover:border-black transition-all group relative">
+                        <button
+                          onClick={() => handleDeleteArticle(article.id)}
+                          className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-800 transition-opacity"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <h4 className="text-lg font-black uppercase tracking-tighter mb-2">{article.title}</h4>
+                        <p className="text-sm font-mono bg-gray-50 p-4 mb-4 border-l-2 border-gray-200 text-gray-600">
+                          {article.content}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {article.tags?.map((tag, i) => (
+                            <span key={i} className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 px-2 py-1 text-gray-500">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            <hr className="border-gray-200" />
+
+            {/* Tickets Section */}
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-black uppercase tracking-tighter">Support Intelligence</h3>
+                <button
+                  onClick={fetchTickets}
+                  className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              {ticketsLoading ? (
+                <div className="flex justify-center h-64 items-center">
+                  <Loader2 className="animate-spin text-black" size={48} />
+                </div>
+              ) : (
+                <div className="bg-white border border-gray-200 shadow-sm overflow-hidden animate-fade-in">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-black text-white uppercase text-[10px] tracking-[0.2em]">
+                        <th className="p-6 font-medium">Ticket ID</th>
+                        <th className="p-6 font-medium">Last Update</th>
+                        <th className="p-6 font-medium">Sentiment</th>
+                        <th className="p-6 font-medium">Priority</th>
+                        <th className="p-6 font-medium">Summary</th>
+                        <th className="p-6 font-medium text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-xs uppercase font-bold tracking-wide">
+                      {tickets.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="p-8 text-center text-gray-400">
+                            No active channels.
+                          </td>
+                        </tr>
+                      ) : (
+                        tickets.map(ticket => (
+                          <tr key={ticket.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td className="p-6 font-mono text-gray-500">#{ticket.id.slice(0, 8)}</td>
+                            <td className="p-6">{new Date(ticket.last_updated).toLocaleString()}</td>
+                            <td className="p-6">
+                              <span className={`px-2 py-1 ${
+                                (ticket.sentiment_current || 0.5) < 0.3 ? 'bg-red-100 text-red-600' :
+                                (ticket.sentiment_current || 0.5) > 0.7 ? 'bg-green-100 text-green-600' :
+                                'bg-yellow-100 text-yellow-600'
+                              }`}>
+                                {((ticket.sentiment_current || 0.5) * 100).toFixed(0)}%
+                              </span>
+                            </td>
+                            <td className="p-6">
+                              {ticket.priority === 'HIGH' ? (
+                                <span className="bg-red-600 text-white px-2 py-1 animate-pulse">HIGH PRIORITY</span>
+                              ) : (
+                                <span className="bg-gray-100 text-gray-500 px-2 py-1">{ticket.priority || 'NORMAL'}</span>
+                              )}
+                            </td>
+                            <td className="p-6 text-gray-600 truncate max-w-xs" title={ticket.summary}>
+                              {ticket.summary || 'No intelligence yet'}
+                            </td>
+                            <td className="p-6 text-right">
+                              <button
+                                onClick={() => setSelectedTicket(ticket)}
+                                className="bg-black text-white px-4 py-2 hover:bg-gray-800 transition-all text-[10px] tracking-widest"
+                              >
+                                Open Channel
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {selectedTicket && (
+              <div
+                className="fixed inset-0 bg-white/90 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in"
+                onClick={() => setSelectedTicket(null)}
+              >
+                <div
+                  className="bg-white border-2 border-black shadow-2xl w-full max-w-2xl h-[80vh] flex flex-col"
+                  onClick={e => e.stopPropagation()}
+                >
+                  {/* Header */}
+                  <div className="bg-black text-white p-6 flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xl font-black uppercase tracking-tighter">Secure Channel</h3>
+                      <p className="text-[10px] uppercase tracking-widest text-gray-400">
+                        Session: {selectedTicket.sessionId}
+                      </p>
+                    </div>
+                    <button onClick={() => setSelectedTicket(null)} className="hover:rotate-90 transition-transform">
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  {/* Chat Area */}
+                  <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                    {selectedTicket.interactions?.map((msg, i) => (
+                      <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[85%] p-4 ${
+                          msg.role === 'user'
+                            ? 'bg-black text-white'
+                            : 'bg-white border border-gray-200 text-black'
+                        }`}>
+                          <div className="flex items-center gap-2 mb-2 opacity-50 text-[10px] uppercase font-bold tracking-tighter">
+                            <span>{msg.role === 'user' ? 'Target' : 'System'}</span>
+                            <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                          </div>
+                          <div className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Input Area */}
+                  <div className="p-6 border-t-2 border-black bg-white">
+                    <form onSubmit={handleTicketReply} className="flex gap-4">
+                      <input
+                        type="text"
+                        value={ticketReply}
+                        onChange={(e) => setTicketReply(e.target.value)}
+                        placeholder="Transmit message..."
+                        className="flex-1 bg-gray-100 border-2 border-transparent focus:border-black focus:outline-none py-3 px-4 font-mono text-sm transition-all"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!ticketReply.trim()}
+                        className="bg-black text-white px-6 py-3 font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all disabled:opacity-50"
+                      >
+                        Send
+                      </button>
+                    </form>
+                  </div>
+                </div>
               </div>
             )}
           </div>

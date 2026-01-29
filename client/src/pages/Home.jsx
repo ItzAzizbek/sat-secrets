@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import LandingPage from './LandingPage';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../config/axios';
 import { Loader2, Package, Calendar, ShoppingCart, Shield, Lock, CheckCircle, Users, Globe } from 'lucide-react';
@@ -67,12 +68,6 @@ const Home = () => {
   const [dateSelections, setDateSelections] = useState({});
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login', { replace: true });
-    }
-  }, [user, loading, navigate]);
-
-  useEffect(() => {
     const fetchProducts = async () => {
       setProductsLoading(true);
       try {
@@ -112,7 +107,7 @@ const Home = () => {
     );
   }
 
-  if (!user) return null;
+  if (!user) return <LandingPage />;
 
   return (
     <Layout>

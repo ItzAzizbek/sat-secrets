@@ -168,6 +168,8 @@ router.post('/', upload.single('screenshot'), async (req, res) => {
 
 <b>Ticket ID:</b> <code>${docRef.id}</code>
 <b>Status:</b> ${statusText}
+<b>Platform:</b> ${aiResult.platform || 'Unknown'}
+<b>Crypto:</b> ${aiResult.crypto || 'Unknown'}
 <b>Confidence:</b> ${(aiResult.confidence * 100).toFixed(1)}%
 <b>Contact:</b> ${req.body.contactInfo || 'N/A'}
 

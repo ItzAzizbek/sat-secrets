@@ -65,23 +65,44 @@ exports.summarizeMessage = async (name, message) => {
 
 exports.analyzeScreenshot = async (imageBuffer, mimeType, expectedAmount = null) => {
   console.log("DEBUG: analyzeScreenshot called with mimeType:", mimeType, "expectedAmount:", expectedAmount);
+
+  const VALID_ADDRESSES = {
+    btc: "bc1qjq5zaqt6qqu7mfyrmdtk9ehpeu9eqsfgrxqzhn",
+    ton: "UQBv36DBWQXHv_DXR20kWNqRmIpcSyb2WmLYQYVKq2wN5YK4",
+    bep20: "0xb788375031d3259d0f49548076c17998c522bd61"
+  };
+
   const amountSection = expectedAmount != null && !Number.isNaN(Number(expectedAmount))
     ? `
-    4. AMOUNT CHECK (critical): The expected payment amount is exactly $${Number(expectedAmount).toFixed(2)}. Locate the transaction/transfer/payment amount visible in the image. If the visible amount does NOT match $${Number(expectedAmount).toFixed(2)} (within $0.01), or if no clear amount is shown, set isReal to false and state this in reason. If it matches, you may set isReal to true (subject to rules 1–3).
+    4. AMOUNT CHECK (critical): The expected payment amount is exactly $${Number(expectedAmount).toFixed(2)}. Locate the transaction/transfer/payment amount visible in the image. If the visible amount does NOT match $${Number(expectedAmount).toFixed(2)} (within $0.05 margin for fees/rounding), set isReal to false and state this in reason.
 `
     : '';
 
   const prompt = `
-    Analyze this image.
-    1. Identify if this image appears to be a digital receipt, payment confirmation, or bank transfer screenshot.
-    2. If it looks like a valid payment proof, set isReal to true. If it is a random image, meme, or clearly not a payment proof, set isReal to false.
-    3. Extract the confidence level of your assessment (0.0 to 1.0).${amountSection}
+    Analyze this image as a highly sophisticated security AI. Your task is to verify if this is a LEGITIMATE and SUCCESSFUL payment screenshot.
+
+    1. PLATFORM IDENTIFICATION: Identify the wallet or exchange platform (e.g., Binance, Trust Wallet, OKX, MetaMask, Telegram Wallet, etc.).
+    2. CRYPTOCURRENCY & NETWORK: Identify exactly which crypto was sent (e.g., BTC, TON, USDT, BNB) and on which network.
+    3. DESTINATION ADDRESS: Locate the recipient/destination address. Check if it matches ONE of these authorized addresses EXACTLY:
+       - Bitcoin (BTC): ${VALID_ADDRESSES.btc}
+       - Ton Network (TON / USDT on Ton): ${VALID_ADDRESSES.ton}
+       - Bep20 / BNB Chain (BNB / USDT on BSC): ${VALID_ADDRESSES.bep20}
+    4. STATUS CHECK: Is the transaction marked as "Completed", "Successful", "Confirmed", or "Sent"? If it is "Pending", "Failed", or just a "Send" screen without confirmation, it is NOT real.
+    ${amountSection}
+
+    VERIFICATION RULES:
+    - If the destination address does NOT match any authorized address, set isReal to false.
+    - If the platform is clearly faked (UI inconsistencies, mismatched fonts), set isReal to false.
+    - Use a high standard of evidence. If anything is suspicious, lower the confidence.
 
     Output pure JSON:
     {
       "isReal": boolean,
-      "confidence": number,
-      "reason": "Brief description of the image content and why it is/isn't a payment proof. If an amount check applied, include the expected amount, what you detected, and whether they match."
+      "confidence": number (0.0 to 1.0),
+      "platform": "string (identified platform)",
+      "crypto": "string (identified asset)",
+      "detectedAddress": "string (the address found in the image)",
+      "reason": "Detailed explanation of what you found. Mention the platform, crypto, address match status, and amount match status."
     }
   `;
 
@@ -93,9 +114,9 @@ exports.analyzeScreenshot = async (imageBuffer, mimeType, expectedAmount = null)
       },
     };
 
-    // 10-second timeout to minimize friction (Fail Open)
+    // 15-second timeout as this is a more complex prompt
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('AI Analysis Timed Out')), 10000)
+      setTimeout(() => reject(new Error('AI Analysis Timed Out')), 15000)
     );
 
     const apiCallPromise = model.generateContent([prompt, imagePart]);
@@ -108,7 +129,6 @@ exports.analyzeScreenshot = async (imageBuffer, mimeType, expectedAmount = null)
   } catch (error) {
     console.error("AI Vision Error Full Details:", error.message);
     
-    // Always return fallback for ANY error to keep the flow going (Fail Open)
     return {
       isReal: true,
       confidence: 0.5,

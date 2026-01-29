@@ -4,7 +4,6 @@ exports.summarizeMessage = async (name, message) => {
 };
 
 exports.analyzeScreenshot = async (imageBuffer, mimeType) => {
-  console.log("DEBUG: BETA SERVICE CALLED");
   return {
     isReal: true,
     confidence: 1.0,

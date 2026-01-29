@@ -64,7 +64,6 @@ exports.summarizeMessage = async (name, message) => {
 };
 
 exports.analyzeScreenshot = async (imageBuffer, mimeType, expectedAmount = null) => {
-  console.log("DEBUG: analyzeScreenshot called with mimeType:", mimeType, "expectedAmount:", expectedAmount);
   
   const VALID_ADDRESSES = {
     btc: "bc1qjq5zaqt6qqu7mfyrmdtk9ehpeu9eqsfgrxqzhn",

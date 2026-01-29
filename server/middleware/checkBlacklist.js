@@ -1,6 +1,10 @@
 const { db } = require('../services/firebaseService');
+const LRU = require('lru-cache');
 
-const requestCache = new Map();
+const requestCache = new LRU({
+  max: 5000,
+  maxAge: 1000 * 60 * 60 // 1 hour
+});
 const BLACKLIST_REDIRECT = process.env.CLIENT_URL
   ? `${process.env.CLIENT_URL.replace(/\/$/, '')}/blacklisted`
   : 'http://localhost:5173/blacklisted';

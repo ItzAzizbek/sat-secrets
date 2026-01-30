@@ -178,7 +178,10 @@ const Checkout = () => {
                 <span className="text-4xl font-black">{offer.price}</span>
               </div>
 
-              {(exam || offer.title || "").toLowerCase().includes('sat') && (
+              {(exam || offer.title || "").toLowerCase().includes('sat') &&
+               !(exam || offer.title || "").toLowerCase().includes('fee waiver') &&
+               !(exam || offer.title || "").toLowerCase().includes('registration') &&
+               !(exam || offer.title || "").toLowerCase().includes('registeration') && (
                 <div className="pt-4 border-t-2 border-gray-200">
                    <p className="text-[10px] text-gray-500 uppercase leading-relaxed font-bold">
                     Files will arrive between 1-3 AM GMT+5. The College Board usually uploads the exam at 12:00 AM local time on Bluebook. Upon upload, we immediately start scraping and structuring material to send between 1-3 AM GMT+5.

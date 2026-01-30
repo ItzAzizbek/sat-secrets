@@ -2,24 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 const { db } = require('../services/firebaseService');
+const authAdmin = require('../middleware/authAdmin');
 
-// Middleware to check admin auth (Basic implementation based on email in body or header? 
-// For now, let's assume client sends an 'admin-secret' header or similar simple protection as requested by .env approach)
-const isAdmin = (req, res, next) => {
-  const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(email => email.trim().toLowerCase());
-  const userEmail = (req.headers['x-user-email'] || '').trim().toLowerCase();
-  
-  if (userEmail && adminEmails.includes(userEmail)) {
-    next();
-  } else {
-    // Check for admin-secret as a fallback or for development
-    const adminSecret = req.headers['x-admin-secret'];
-    if (adminSecret && adminSecret === process.env.ADMIN_SECRET) {
-      return next();
-    }
-    res.status(403).json({ error: 'Admin access denied' });
-  }
-};
+// Apply admin authentication to all routes
+router.use(authAdmin);
 
 // GET /api/admin/requests
 router.get('/requests', async (req, res) => {

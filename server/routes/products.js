@@ -2,10 +2,20 @@ const express = require('express');
 const router = express.Router();
 
 const { db } = require('../services/firebaseService');
+const LRU = require('lru-cache');
+
+const cache = new LRU({ max: 100, maxAge: 1000 * 60 * 5 }); // 5 minutes cache
 
 // GET /api/products - Get all products (exams with dates)
 router.get('/', async (req, res) => {
   try {
+    const CACHE_KEY = 'all_products';
+    const cachedProducts = cache.get(CACHE_KEY);
+
+    if (cachedProducts) {
+      return res.status(200).json({ products: cachedProducts });
+    }
+
     // Try with orderBy, fallback to simple get if index not created
     let snapshot;
     try {
@@ -17,6 +27,9 @@ router.get('/', async (req, res) => {
     const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     // Sort in memory as fallback
     products.sort((a, b) => (a.exam || '').localeCompare(b.exam || ''));
+
+    cache.set(CACHE_KEY, products);
+
     res.status(200).json({ products });
   } catch (error) {
     console.error('Error fetching products:', error);

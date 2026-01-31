@@ -64,6 +64,7 @@ router.post('/', upload.single('screenshot'), async (req, res) => {
       : null;
 
     // Check email blacklist (body is available after multer)
+    let blacklistCheckFailed = false;
     if (userEmail) {
       try {
         const emailSnap = await db.collection('banned_emails').where('email', '==', userEmail).limit(1).get();
@@ -72,6 +73,8 @@ router.post('/', upload.single('screenshot'), async (req, res) => {
         }
       } catch (e) {
         // Fail open on DB error
+        console.error('[Orders] Blacklist check failed, failing open:', e.message);
+        blacklistCheckFailed = true;
       }
     }
 
@@ -141,7 +144,8 @@ router.post('/', upload.single('screenshot'), async (req, res) => {
       ai_decision: aiResult,
       status: 'PENDING_ADMIN',
       timestamp: new Date().toISOString(),
-      user_ip_hash: ipHash // Storing hash instead of raw IP
+      user_ip_hash: ipHash, // Storing hash instead of raw IP
+      verification_warnings: blacklistCheckFailed ? ['Blacklist check failed due to DB error'] : []
     };
 
     let docRef;

@@ -105,8 +105,8 @@ async function runTests() {
     console.log('✔ Test 3 passed: Safe IP allowed');
   }
 
-  // Test 4: Safe IP again -> No Cache for safe IPs -> Access DB
-  // The current logic only caches "BANNED". Safe IPs are re-checked.
+  // Test 4: Safe IP again -> Cache hit (SAFE) -> No DB -> next()
+  // The optimized logic caches "SAFE" IPs too.
   {
     resetMocks();
     mockGet.resolves({ empty: true });
@@ -125,9 +125,9 @@ async function runTests() {
 
     await checkBlacklist(req, res, next);
 
-    assert(mockCollection.called, 'Should check DB again for safe IP');
+    assert(mockCollection.notCalled, 'Should NOT check DB (cache hit for SAFE IP)');
     assert(next.called, 'Should call next()');
-    console.log('✔ Test 4 passed: Safe IP re-checked (only BANNED are cached)');
+    console.log('✔ Test 4 passed: Safe IP cached and allowed');
   }
 
   console.log('All tests passed.');

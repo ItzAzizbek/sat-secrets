@@ -15,23 +15,28 @@ const checkBlacklist = async (req, res, next) => {
     req.connection.remoteAddress;
 
   // 1. IP blacklist
-  if (requestCache.has(ip) && requestCache.get(ip) === 'BANNED') {
+  const cachedStatus = requestCache.get(ip);
+  if (cachedStatus === 'BANNED') {
     return res.status(403).json({ error: 'Access denied', redirect: BLACKLIST_REDIRECT });
   }
 
-  try {
-    const ipSnap = await db.collection('banned_ips').where('ip', '==', ip).limit(1).get();
-    if (!ipSnap.empty) {
-      requestCache.set(ip, 'BANNED');
-      return res.status(403).json({ error: 'Access denied', redirect: BLACKLIST_REDIRECT });
+  if (cachedStatus !== 'SAFE') {
+    try {
+      const ipSnap = await db.collection('banned_ips').where('ip', '==', ip).limit(1).get();
+      if (!ipSnap.empty) {
+        requestCache.set(ip, 'BANNED');
+        return res.status(403).json({ error: 'Access denied', redirect: BLACKLIST_REDIRECT });
+      } else {
+        requestCache.set(ip, 'SAFE');
+      }
+    } catch (error) {
+      if (error.code === 7 || error.code === 5 || (error.message && error.message.includes('PERMISSION_DENIED'))) {
+        console.warn(`Blacklist Check Skipped: Firestore Error Code ${error.code}`);
+      } else {
+        console.error('Blacklist Check Error:', error);
+      }
+      // Fail open for IP check
     }
-  } catch (error) {
-    if (error.code === 7 || error.code === 5 || (error.message && error.message.includes('PERMISSION_DENIED'))) {
-      console.warn(`Blacklist Check Skipped: Firestore Error Code ${error.code}`);
-    } else {
-      console.error('Blacklist Check Error:', error);
-    }
-    // Fail open for IP check
   }
 
   // 2. Email blacklist: block banned emails from ALL buying-related APIs (everywhere except /api/admin)

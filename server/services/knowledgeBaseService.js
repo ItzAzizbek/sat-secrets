@@ -2,6 +2,11 @@ const { db } = require('./firebaseService');
 
 const COLLECTION_NAME = 'knowledge_base';
 
+// Cache configuration
+let cachedArticles = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 /**
  * Adds or updates an article in the Knowledge Base
  * @param {string} title
@@ -18,6 +23,7 @@ exports.addArticle = async (title, content, tags) => {
       tags: tags.map(t => t.toLowerCase()),
       last_updated: new Date().toISOString()
     });
+    cachedArticles = null; // Invalidate cache
     console.log(`[KnowledgeBase] Article added: ${title}`);
   } catch (error) {
     console.error('[KnowledgeBase] Error adding article:', error);
@@ -42,14 +48,24 @@ exports.addArticle = async (title, content, tags) => {
  */
 exports.searchArticles = async (query) => {
   try {
-    const snapshot = await db.collection(COLLECTION_NAME).get();
-    if (snapshot.empty) return [];
+    // Check cache
+    const now = Date.now();
+    if (!cachedArticles || (now - lastCacheTime > CACHE_TTL)) {
+      // console.log('[KnowledgeBase] Cache miss, fetching from Firestore...');
+      const snapshot = await db.collection(COLLECTION_NAME).get();
+      cachedArticles = [];
+      if (!snapshot.empty) {
+        snapshot.forEach(doc => cachedArticles.push(doc.data()));
+      }
+      lastCacheTime = now;
+    }
+
+    if (cachedArticles.length === 0) return [];
 
     const articles = [];
     const queryTokens = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
 
-    snapshot.forEach(doc => {
-      const data = doc.data();
+    cachedArticles.forEach(data => {
       let score = 0;
 
       // Scoring logic

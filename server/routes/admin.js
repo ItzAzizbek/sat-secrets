@@ -10,9 +10,32 @@ router.use(authAdmin);
 // GET /api/admin/requests
 router.get('/requests', async (req, res) => {
   try {
-    const snapshot = await db.collection('orders').orderBy('timestamp', 'desc').get();
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+    const lastTimestamp = req.query.lastTimestamp;
+    const lastId = req.query.lastId;
+
+    let query = db.collection('orders')
+      .orderBy('timestamp', 'desc')
+      .orderBy('__name__', 'desc')
+      .limit(limit);
+
+    if (lastTimestamp && lastId) {
+      query = query.startAfter(lastTimestamp, lastId);
+    }
+
+    const snapshot = await query.get();
     const requests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.status(200).json({ requests });
+
+    let nextCursor = null;
+    if (requests.length === limit) {
+      const lastDoc = requests[requests.length - 1];
+      nextCursor = {
+        timestamp: lastDoc.timestamp,
+        id: lastDoc.id
+      };
+    }
+
+    res.status(200).json({ requests, nextCursor });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -11,8 +11,10 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'products'
   const [requests, setRequests] = useState([]);
+  const [nextCursor, setNextCursor] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [productsLoading, setProductsLoading] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   
@@ -51,27 +53,47 @@ const Admin = () => {
     loadData();
   }, [authLoading, user]);
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (cursor = null) => {
+    if (cursor) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
+      const params = cursor ? {
+        lastTimestamp: cursor.timestamp,
+        lastId: cursor.id,
+        limit: 20
+      } : { limit: 20 };
+
       const res = await api.get('/admin/requests', {
+        params,
         timeout: 5000,
         validateStatus: () => true
       });
+
       if (res.status === 200) {
-        setRequests(res.data.requests || []);
+        if (cursor) {
+          setRequests(prev => [...prev, ...(res.data.requests || [])]);
+        } else {
+          setRequests(res.data.requests || []);
+        }
+        setNextCursor(res.data.nextCursor);
       } else {
-        setRequests([]);
+        if (!cursor) setRequests([]);
       }
     } catch (error) {
       // Silently handle connection errors
       if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED') {
-        setRequests([]);
+        if (!cursor) setRequests([]);
       } else {
         console.error('Error fetching requests:', error);
-        setRequests([]);
+        if (!cursor) setRequests([]);
       }
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -330,6 +352,23 @@ const Admin = () => {
                     )}
                   </tbody>
                 </table>
+                {nextCursor && (
+                  <div className="p-6 flex justify-center border-t border-gray-100">
+                    <button
+                      onClick={() => fetchRequests(nextCursor)}
+                      disabled={loadingMore}
+                      className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
+                    >
+                      {loadingMore ? (
+                        <>
+                          <Loader2 className="animate-spin" size={14} /> Loading...
+                        </>
+                      ) : (
+                        'Load More'
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
